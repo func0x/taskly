@@ -1,5 +1,5 @@
 import "react-native-get-random-values";
-import { StyleSheet, TextInput, View } from "react-native";
+import { ScrollView, StyleSheet, TextInput } from "react-native";
 import { theme } from "../theme";
 import { ShoppingListItem } from "../components/ShoppingListItem";
 import { useState } from "react";
@@ -31,7 +31,11 @@ export default function App() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      stickyHeaderIndices={[0]}
+    >
       <TextInput
         placeholder="E.g. Coffee ☕️"
         style={styles.textInput}
@@ -45,7 +49,7 @@ export default function App() {
           <ShoppingListItem key={id} name={name} isCompleted={isCompleted} />
         );
       })}
-    </View>
+    </ScrollView>
   );
 }
 
@@ -53,9 +57,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colorWhite,
-    paddingTop: 12,
+    padding: 12,
+  },
+  contentContainer: {
+    paddingBottom: 24,
   },
   textInput: {
+    backgroundColor: theme.colorWhite,
     borderWidth: 2,
     borderColor: theme.colorLightGrey,
     padding: 12,
