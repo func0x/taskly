@@ -22,6 +22,7 @@ export default function Layout() {
           tabBarIcon: ({ size, color }) => (
             <Feather name="clock" size={size} color={color} />
           ),
+          headerShown: false,
         }}
       />
       <Tabs.Screen
