@@ -8,13 +8,12 @@ import { v4 as uuidv4 } from "uuid";
 type ShoppingListItemType = {
   id: string;
   name: string;
-  isCompleted?: boolean;
   completedAtTimestamp?: number;
 };
 
 const initialList: ShoppingListItemType[] = [
   { id: uuidv4(), name: "Coffee ☕️" },
-  { id: uuidv4(), name: "Tea 🫖", isCompleted: true },
+  { id: uuidv4(), name: "Tea 🫖", completedAtTimestamp: Date.now() },
   { id: uuidv4(), name: "Milk 🥛" },
   { id: uuidv4(), name: "Cake 🍰" },
 ];
@@ -41,7 +40,6 @@ export default function App() {
       if (item.id === id) {
         return {
           ...item,
-          isCompleted: !item.isCompleted,
           completedAtTimestamp: item.completedAtTimestamp
             ? undefined
             : Date.now(),
@@ -73,7 +71,7 @@ export default function App() {
       renderItem={({ item }) => (
         <ShoppingListItem
           name={item.name}
-          isCompleted={item.isCompleted}
+          isCompleted={Boolean(item.completedAtTimestamp)}
           onDelete={() => handleDelete(item.id)}
           onToggleComplete={() => handleToggleComplete(item.id)}
         />
