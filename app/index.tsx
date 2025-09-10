@@ -12,6 +12,7 @@ import { ShoppingListItem } from "../components/ShoppingListItem";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { getFromStorage, setToStorage } from "../utils/storage";
+import * as Haptics from "expo-haptics";
 
 const storageKey = "shopping-list";
 
@@ -45,6 +46,7 @@ export default function App() {
       ];
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       setList(newList);
+
       setToStorage(storageKey, newList);
       setValue("");
     }
@@ -54,12 +56,19 @@ export default function App() {
     const newList = list.filter((item) => item.id !== id);
     setToStorage(storageKey, newList);
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setList(newList);
   };
 
   const handleToggleComplete = (id: string) => {
     const newList = list.map((item) => {
       if (item.id === id) {
+        if (item.completedAtTimestamp) {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        } else {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        }
+
         return {
           ...item,
           completedAtTimestamp: item.completedAtTimestamp
