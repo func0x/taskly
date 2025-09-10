@@ -9,13 +9,20 @@ type ShoppingListItemType = {
   id: string;
   name: string;
   completedAtTimestamp?: number;
+  lastUpdatedTimestamp: number;
 };
 
 const initialList: ShoppingListItemType[] = [
-  { id: uuidv4(), name: "Coffee ☕️" },
-  { id: uuidv4(), name: "Tea 🫖", completedAtTimestamp: Date.now() },
-  { id: uuidv4(), name: "Milk 🥛" },
-  { id: uuidv4(), name: "Cake 🍰" },
+  { id: uuidv4(), name: "Coffee ☕️", lastUpdatedTimestamp: Date.now() },
+  {
+    id: uuidv4(),
+    name: "Tea 🫖",
+
+    lastUpdatedTimestamp: Date.now(),
+    completedAtTimestamp: Date.now(),
+  },
+  { id: uuidv4(), name: "Milk 🥛", lastUpdatedTimestamp: Date.now() },
+  { id: uuidv4(), name: "Cake 🍰", lastUpdatedTimestamp: Date.now() },
 ];
 
 export default function App() {
@@ -24,7 +31,10 @@ export default function App() {
 
   const handleSubmit = () => {
     if (value) {
-      const newList = [...list, { id: uuidv4(), name: value }];
+      const newList = [
+        ...list,
+        { id: uuidv4(), name: value, lastUpdatedTimestamp: Date.now() },
+      ];
       setList(newList);
       setValue("");
     }
@@ -43,6 +53,7 @@ export default function App() {
           completedAtTimestamp: item.completedAtTimestamp
             ? undefined
             : Date.now(),
+          lastUpdatedTimestamp: Date.now(),
         };
       }
       return item;
@@ -52,7 +63,7 @@ export default function App() {
 
   return (
     <FlatList
-      data={list}
+      data={orderShoppingList(list)}
       ListEmptyComponent={() => (
         <View style={styles.listEmptyContainer}>
           <Text>Your shopping list is empty!</Text>
@@ -83,6 +94,28 @@ export default function App() {
   );
 }
 
+function orderShoppingList(shoppingList: ShoppingListItemType[]) {
+  return shoppingList.sort((item1, item2) => {
+    if (item1.completedAtTimestamp && item2.completedAtTimestamp) {
+      return item2.completedAtTimestamp - item1.completedAtTimestamp;
+    }
+
+    if (item1.completedAtTimestamp && !item2.completedAtTimestamp) {
+      return 1;
+    }
+
+    if (!item1.completedAtTimestamp && item2.completedAtTimestamp) {
+      return -1;
+    }
+
+    if (!item1.completedAtTimestamp && !item2.completedAtTimestamp) {
+      return item2.lastUpdatedTimestamp - item1.lastUpdatedTimestamp;
+    }
+
+    return 0;
+  });
+}
+
 const styles = StyleSheet.create({
   listEmptyContainer: {
     justifyContent: "center",
@@ -92,7 +125,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colorWhite,
-    padding: 12,
+    paddingVertical: 12,
   },
   contentContainer: {
     paddingBottom: 24,
