@@ -1,9 +1,19 @@
 import "react-native-get-random-values";
-import { StyleSheet, TextInput, FlatList, View, Text } from "react-native";
+import {
+  StyleSheet,
+  TextInput,
+  FlatList,
+  View,
+  Text,
+  LayoutAnimation,
+} from "react-native";
 import { theme } from "../theme";
 import { ShoppingListItem } from "../components/ShoppingListItem";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { getFromStorage, setToStorage } from "../utils/storage";
+
+const storageKey = "shopping-list";
 
 type ShoppingListItemType = {
   id: string;
@@ -12,22 +22,20 @@ type ShoppingListItemType = {
   lastUpdatedTimestamp: number;
 };
 
-const initialList: ShoppingListItemType[] = [
-  { id: uuidv4(), name: "Coffee ☕️", lastUpdatedTimestamp: Date.now() },
-  {
-    id: uuidv4(),
-    name: "Tea 🫖",
-
-    lastUpdatedTimestamp: Date.now(),
-    completedAtTimestamp: Date.now(),
-  },
-  { id: uuidv4(), name: "Milk 🥛", lastUpdatedTimestamp: Date.now() },
-  { id: uuidv4(), name: "Cake 🍰", lastUpdatedTimestamp: Date.now() },
-];
-
 export default function App() {
   const [value, setValue] = useState("");
-  const [list, setList] = useState(initialList);
+  const [list, setList] = useState<ShoppingListItemType[]>([]);
+
+  useEffect(() => {
+    const fetchInitial = async () => {
+      const data = await getFromStorage(storageKey);
+      if (data) {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        setList(data);
+      }
+    };
+    fetchInitial();
+  }, []);
 
   const handleSubmit = () => {
     if (value) {
@@ -35,13 +43,17 @@ export default function App() {
         ...list,
         { id: uuidv4(), name: value, lastUpdatedTimestamp: Date.now() },
       ];
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       setList(newList);
+      setToStorage(storageKey, newList);
       setValue("");
     }
   };
 
   const handleDelete = (id: string) => {
     const newList = list.filter((item) => item.id !== id);
+    setToStorage(storageKey, newList);
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setList(newList);
   };
 
@@ -58,6 +70,8 @@ export default function App() {
       }
       return item;
     });
+    setToStorage(storageKey, newList);
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setList(newList);
   };
 
