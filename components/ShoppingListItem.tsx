@@ -6,7 +6,6 @@ import {
   Pressable,
   View,
 } from "react-native";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import Entypo from "@expo/vector-icons/Entypo";
 import { theme } from "../theme";
 import * as Haptics from "expo-haptics";
@@ -68,8 +67,8 @@ export function ShoppingListItem({
         </Text>
       </View>
       <TouchableOpacity activeOpacity={0.8} onPress={handleDelete}>
-        <AntDesign
-          name="closecircle"
+        <Entypo
+          name="circle-with-cross"
           size={24}
           color={isCompleted ? theme.colorGrey : theme.colorRed}
         />
