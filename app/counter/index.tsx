@@ -5,18 +5,21 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  useWindowDimensions,
 } from "react-native";
 import { theme } from "../../theme";
 import { registerForPushNotificationsAsync } from "../../utils/registerForPushNotificationsAsync";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TimeSegment } from "../../components/TimeSegment";
 import { intervalToDuration, isBefore } from "date-fns";
 import { getFromStorage, setToStorage } from "../../utils/storage";
+import * as Haptics from "expo-haptics";
+import ConfettiCannon from "react-native-confetti-cannon";
 
-// 10 seconds from now
-const frequency = 10 * 1000;
+// 1 week
+const frequency = 7 * 24 * 60 * 60 * 1000;
 
 export const countdownStorageKey = "taskly-countdown";
 
@@ -31,6 +34,7 @@ type CountdownStatus = {
 };
 
 export default function CounterScreen() {
+  const confettiRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [countdownState, setCountdownState] =
     useState<PersistedCountdownState>();
@@ -38,6 +42,7 @@ export default function CounterScreen() {
     isOverdue: false,
     distance: {},
   });
+  const { width } = useWindowDimensions();
 
   const lastCompletedTimestamp = countdownState?.completedAtTimestamps[0];
 
@@ -45,6 +50,7 @@ export default function CounterScreen() {
     const init = async () => {
       const value = await getFromStorage(countdownStorageKey);
       setCountdownState(value);
+      setIsLoading(false);
     };
     init();
   }, []);
@@ -70,12 +76,14 @@ export default function CounterScreen() {
   }, [lastCompletedTimestamp]);
 
   const scheduleNotification = async () => {
+    confettiRef?.current?.start();
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     let pushNotificationId;
     const result = await registerForPushNotificationsAsync();
     if (result === "granted") {
       pushNotificationId = await Notifications.scheduleNotificationAsync({
         content: {
-          title: "The thins is due!",
+          title: "Time to wash the car!",
         },
         trigger: {
           seconds: frequency / 1000,
@@ -123,9 +131,11 @@ export default function CounterScreen() {
       ]}
     >
       {status.isOverdue ? (
-        <Text style={[styles.heading, styles.whiteText]}>Thing ovedue by</Text>
+        <Text style={[styles.heading, styles.whiteText]}>
+          Car wash ovedue by
+        </Text>
       ) : (
-        <Text style={styles.heading}>Thing due in...</Text>
+        <Text style={styles.heading}>Car wash due in...</Text>
       )}
       <View style={styles.row}>
         <TimeSegment
@@ -154,8 +164,15 @@ export default function CounterScreen() {
         activeOpacity={0.8}
         onPress={scheduleNotification}
       >
-        <Text style={styles.buttonText}>I&apos;ve done the thing!</Text>
+        <Text style={styles.buttonText}>I&apos;ve wash the 🚗! 🧼🧽💦</Text>
       </TouchableOpacity>
+      <ConfettiCannon
+        ref={confettiRef}
+        count={50}
+        origin={{ x: width / 2, y: -20 }}
+        autoStart={false}
+        fadeOut
+      />
     </View>
   );
 }
